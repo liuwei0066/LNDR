@@ -13,7 +13,7 @@ from utils.utils import InputPadder
 from PIL import Image
 from matplotlib import pyplot as plt
 import cv2
-
+from time import time
 
 DEVICE = 'cuda'
 
@@ -50,7 +50,9 @@ def demo(args):
             padder = InputPadder(image1.shape, divis_by=32)
             image1, image2 = padder.pad(image1, image2)
 
+            strat_time = time()
             _, flow_up = model(image1, image2, iters=args.valid_iters, test_mode=True)
+            print("model time: {}".format(time() - strat_time))
 
             file_stem = imfile1.split('/')[-1]
             #file_stem, file_extension = os.path.splitext(imfile1)
