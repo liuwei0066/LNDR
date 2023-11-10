@@ -1,41 +1,40 @@
-import cv2
+from PIL import Image
 import os
 
-# 定义裁剪的尺寸
-width, height = 320, 200
+def center_crop_and_save_images(input_folder, output_folder, target_size):
+    # 确保输出文件夹存在
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
 
-# 读入文件夹路径
-src_folder = 'cam1'  #原始文件路径
-dst_folder = 'right'   #保存文件的路径
+    # 获取输入文件夹中所有图像文件
+    image_files = [f for f in os.listdir(input_folder) if f.endswith(('.jpg', '.jpeg', '.png', '.gif'))]
 
-# 选择裁剪的方式 1就是以原点，如果选择2就是左上角，如果选择3就是右上角
-mode = 2  #This 选择
+    for image_file in image_files:
+        input_path = os.path.join(input_folder, image_file)
+        output_path = os.path.join(output_folder, image_file)
 
-# 设置裁剪的位置
-if mode == 1:
-    start_point = (0, 0)
-elif mode == 2:
-    start_point = (0, 0)
-elif mode == 3:
-    start_point = (0, height - 384)
-else:
-    raise Exception("无效的裁剪方式")
+        # 打开图像
+        image = Image.open(input_path)
 
-# 创建目标文件夹
-if not os.path.exists(dst_folder):
-    os.makedirs(dst_folder)
+        # 获取图像的中心坐标
+        width, height = image.size
+        left = (width - target_size[0]) // 2
+        top = (height - target_size[1]) // 2
+        right = (width + target_size[0]) // 2
+        bottom = (height + target_size[1]) // 2
 
-# 遍历文件夹内的所有图片
-for file_name in os.listdir(src_folder):
-    file_path = os.path.join(src_folder, file_name)
+        # 中心裁剪图像
+        cropped_image = image.crop((left, top, right, bottom))
 
-    # 读入图片
-    img = cv2.imread(file_path)
+        # 保存裁剪后的图像
+        cropped_image.save(output_path)
 
-    # 裁剪图片
-    cropped_img = img[start_point[1]:start_point[1]+height, start_point[0]:start_point[0]+width]
+        print(f"Image {image_file} center-cropped and saved to {output_path}")
 
-    # 保存裁剪后的图片
-    dst_path = os.path.join(dst_folder, file_name)
-    cv2.imwrite(dst_path, cropped_img)
+# 指定输入文件夹、输出文件夹和目标尺寸
+input_folder = "paker320_train10/cv"
+output_folder = "paker320_10"
+target_size = (320, 200)  # 替换为你想要的尺寸
 
+# 调用函数进行中心裁剪和保存
+center_crop_and_save_images(input_folder, output_folder, target_size)
