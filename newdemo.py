@@ -46,9 +46,12 @@ def demo(args):
         for (imfile1, imfile2) in tqdm(list(zip(left_images, right_images))):
             image1 = load_image(imfile1)
             image2 = load_image(imfile2)
-
+            print(image1.shape)
+            print("-"*15)
             padder = InputPadder(image1.shape, divis_by=32)
             image1, image2 = padder.pad(image1, image2)
+            print("-"*30)
+            print(image1.shape)
 
             strat_time = time()
             _, flow_up = model(image1, image2, iters=args.valid_iters, test_mode=True)
@@ -58,6 +61,12 @@ def demo(args):
             #file_stem, file_extension = os.path.splitext(imfile1)
             file_stem_without_extension = file_stem.split('.')[0]
             original_output = -flow_up.cpu().numpy().squeeze()
+
+            original_output = original_output * 256
+            original_output[original_output < 0] = 0
+            original_output[original_output > 65535] = 65535
+            original_output = original_output.astype(np.uint16)
+            # 后面保存为opencv图像
 
             cv2.imwrite(f'{out_cv}/{file_stem_without_extension}.png', original_output)
             #print(flow_up)
